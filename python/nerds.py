@@ -35,14 +35,12 @@ def construct_phrases_from_input_dir(input_dir):
 	        phrases.add(line.strip().lower())
     return phrases
 	
-def construct_phrases_from_imap():
-    phrases = set()
-	
+def fetch_and_write_imap_to_dir():
     # account credentials
     username = 'not.gartic.phone@gmail.com'
     password = 'NotGarticPhone399'
 
-
+	folder_name = clean("subject")
 
 
     # create an IMAP4 class with SSL
@@ -97,7 +95,6 @@ def construct_phrases_from_imap():
                             # download attachment
                             filename = part.get_filename()
                             if filename:
-                                folder_name = clean("subject")
                                 if not os.path.isdir(folder_name):
                                     # make a folder for this email (named after the subject)
                                     os.mkdir(folder_name)
@@ -105,7 +102,6 @@ def construct_phrases_from_imap():
                                 # download attachment and save it
                                 open(filepath, "wb").write(part.get_payload(decode=True))
                                 print(part.get_payload(decode=True).decode("utf-8"))
-                                fill_phrases_from_text(phrases, part.get_payload(decode=True).decode("utf-8"))
                 else:
                     # extract content type of email
                     content_type = msg.get_content_type()
@@ -116,7 +112,6 @@ def construct_phrases_from_imap():
                         print(body)
                 if content_type == "text/html":
                     # if it's HTML, create a new HTML file and open it in browser
-                    folder_name = clean(subject)
                     if not os.path.isdir(folder_name):
                         # make a folder for this email (named after the subject)
                         os.mkdir(folder_name)
@@ -124,7 +119,6 @@ def construct_phrases_from_imap():
                     filepath = os.path.join(folder_name, filename)
                     # write the file
                     open(filepath, "w").write(body)
-                    fill_phrases_from_text(phrases, body)
                     # open in the default browser
                     webbrowser.open(filepath)
                 print("="*100)
@@ -133,7 +127,7 @@ def construct_phrases_from_imap():
     imap.close()
     imap.logout()
 	
-    return phrases
+    return folder_name
 
 def main():
     usage = "useage: %prog [options]"
@@ -147,9 +141,10 @@ def main():
 
 
     if (options.input_dir is None):
-        phrases = construct_phrases_from_imap()
+        input_dir = fetch_and_write_imap_to_dir()
     else:
-	    phrases = construct_phrases_from_input_dir(options.input_dir)
+	    input_dir = options.input_dir
+	phrases = construct_phrases_from_input_dir(input_dir)
 
     # Write out all items from the set to a text file
     dump_phrases(phrases)
