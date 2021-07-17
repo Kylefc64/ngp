@@ -78,7 +78,7 @@ def main():
                             # download attachment
                             filename = part.get_filename()
                             if filename:
-                                folder_name = clean("KylesMomsFolder")
+                                folder_name = clean("subject")
                                 if not os.path.isdir(folder_name):
                                     # make a folder for this email (named after the subject)
                                     os.mkdir(folder_name)
@@ -181,3 +181,4 @@ def main():
 
 if __name__ == "__main__":
 	main()
+	
