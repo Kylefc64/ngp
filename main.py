@@ -19,12 +19,14 @@ imap = imaplib.IMAP4_SSL("imap.gmail.com")
 imap.login(username, password)
 
 status, messages = imap.select("INBOX")
-# number of top emails to fetch
-#perhaps i should make this the size of messages
 
-N = 10;
-# total number of emails
+#convert messages to int
 messages = int(messages[0])
+#now that messages is an int, N, which represents the number 
+#of emails in inbox we will search, can be told to search
+# all the messages
+N = messages
+
 
 for i in range(messages, messages-N, -1):
     # fetch the email message by ID
