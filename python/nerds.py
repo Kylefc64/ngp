@@ -53,7 +53,7 @@ def main():
 			    # extract content type of email
 			    content_type = part.get_content_type()
 			    content_disposition = str(part.get("Content-Disposition"))
-			    try:
+			    try:	         	
 				# get the email body
 				body = part.get_payload(decode=True).decode()
 			    except:
@@ -65,7 +65,7 @@ def main():
 				# download attachment
 				filename = part.get_filename()
 				if filename:
-				    folder_name = clean("KylesMomsFolder")
+				    folder_name = clean("subject")
 				    if not os.path.isdir(folder_name):
 					# make a folder for this email (named after the subject)
 					os.mkdir(folder_name)
