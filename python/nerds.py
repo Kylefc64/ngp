@@ -18,7 +18,26 @@ def clean(text):
     # clean text for creating a folder
     return "".join(c if c.isalnum() else "_" for c in text)
 
-def main():
+""" Adds all lines (after stripping whitespace and converting to lowercase)
+    from the text to the phrases set. """
+def fill_phrases_from_text(phrases, text):
+    for line in text.splitlines():
+        phrases.add(line.strip().lower())
+
+""" Constructs and returns a set of all phrases from all files in the given directory. """
+def construct_phrases_from_input_dir(input_dir):
+    phrases = set()
+
+    # Add all lines from each file in the directory to the set
+    for filename in glob.glob(os.path.join(input_dir, '*.txt')):
+        for line in open(filename, 'r'):
+            # Remove whitespace and convert to lowercase before adding to the set
+	        phrases.add(line.strip().lower())
+    return phrases
+	
+def construct_phrases_from_imap():
+    phrases = set()
+	
     # account credentials
     username = 'not.gartic.phone@gmail.com'
     password = 'NotGarticPhone399'
@@ -85,6 +104,8 @@ def main():
                                 filepath = os.path.join(folder_name, filename)
                                 # download attachment and save it
                                 open(filepath, "wb").write(part.get_payload(decode=True))
+                                print(part.get_payload(decode=True).decode("utf-8"))
+                                fill_phrases_from_text(phrases, part.get_payload(decode=True).decode("utf-8"))
                 else:
                     # extract content type of email
                     content_type = msg.get_content_type()
@@ -103,28 +124,32 @@ def main():
                     filepath = os.path.join(folder_name, filename)
                     # write the file
                     open(filepath, "w").write(body)
+                    fill_phrases_from_text(phrases, body)
                     # open in the default browser
                     webbrowser.open(filepath)
                 print("="*100)
+				
+    # close the connection and logout
+    imap.close()
+    imap.logout()
+	
+    return phrases
 
-
-
-
+def main():
     usage = "useage: %prog [options]"
     parser = OptionParser(usage)
     parser.add_option("-d", "--dir", type="string", dest="input_dir", help="combine and unique-ify all lines from all files in the directory")
     (options, args) = parser.parse_args()
+	
+
+
+
+
 
     if (options.input_dir is None):
-        parser.error("not enough number of arguments")
-
-    phrases = set()
-
-    # Add all lines from each file in the directory to the set
-    for filename in glob.glob(os.path.join(options.input_dir, '*.txt')):
-        for line in open(filename, 'r'):
-            # Remove whitespace and convert to lowercase before adding to the set
-	        phrases.add(line.strip().lower())
+        phrases = construct_phrases_from_imap()
+    else:
+	    phrases = construct_phrases_from_input_dir(options.input_dir)
 
     # Write out all items from the set to a text file
     dump_phrases(phrases)
@@ -174,10 +199,6 @@ def main():
     # TODO: It might not even be necessary to sleep here. Test to find out
     time.sleep(3)
     session.close()
-
-    # close the connection and logout
-    imap.close()
-    imap.logout()
 
 if __name__ == "__main__":
 	main()
