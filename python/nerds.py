@@ -40,7 +40,7 @@ def fetch_and_write_imap_to_dir():
     username = 'not.gartic.phone@gmail.com'
     password = 'NotGarticPhone399'
 
-	folder_name = clean("subject")
+    folder_name = clean("subject")
 
 
     # create an IMAP4 class with SSL
@@ -144,7 +144,7 @@ def main():
         input_dir = fetch_and_write_imap_to_dir()
     else:
 	    input_dir = options.input_dir
-	phrases = construct_phrases_from_input_dir(input_dir)
+    phrases = construct_phrases_from_input_dir(input_dir)
 
     # Write out all items from the set to a text file
     dump_phrases(phrases)
