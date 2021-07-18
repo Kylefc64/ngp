@@ -1,6 +1,8 @@
-import os,glob, imaplib, email,webbrowser
+import os, glob, imaplib, email, webbrowser
 from email.header import decode_header
 from optparse import OptionParser
+from PyQt5 import QtCore, QtGui
+import pyperclip
 import time
 
 from bs4 import BeautifulSoup
@@ -9,23 +11,32 @@ from urllib.parse import urljoin
 import requests
 
 """ Writes the final comma-separated output to skribblio.txt. """
+
+
 def dump_phrases(phrases):
     f = open("skribblio.txt", "w")
     for phrase in phrases:
         f.write("%s," % phrase)
     f.close()
-	
+
+
 def clean(text):
     # clean text for creating a folder
     return "".join(c if c.isalnum() else "_" for c in text)
 
+
 """ Adds all lines (after stripping whitespace and converting to lowercase)
     from the text to the phrases set. """
+
+
 def fill_phrases_from_text(phrases, text):
     for line in text:
         phrases.add(line.strip().lower())
 
+
 """ Constructs and returns a set of all phrases from all files in the given directory. """
+
+
 def construct_phrases_from_input_dir(input_dir):
     phrases = set()
 
@@ -33,8 +44,11 @@ def construct_phrases_from_input_dir(input_dir):
     for filename in glob.glob(os.path.join(input_dir, '*.txt')):
         fill_phrases_from_text(phrases, open(filename, 'r'))
     return phrases
-	
+
+
 """ Constructs and returns set of all words found in all .txt attachments send to not.gartic.phone@gmail.com. """
+
+
 def construct_phrases_from_imap():
     phrases = set()
 
@@ -44,7 +58,6 @@ def construct_phrases_from_imap():
 
     folder_name = clean("subject")
 
-
     # create an IMAP4 class with SSL
     imap = imaplib.IMAP4_SSL("imap.gmail.com")
     # authenticate
@@ -52,15 +65,14 @@ def construct_phrases_from_imap():
 
     status, messages = imap.select("INBOX")
 
-    #convert messages to int
+    # convert messages to int
     messages = int(messages[0])
-    #now that messages is an int, N, which represents the number 
-    #of emails in inbox we will search, can be told to search
+    # now that messages is an int, N, which represents the number
+    # of emails in inbox we will search, can be told to search
     # all the messages
     N = messages
 
-
-    for i in range(messages, messages-N, -1):
+    for i in range(messages, messages - N, -1):
         # fetch the email message by ID
         res, msg = imap.fetch(str(i), "(RFC822)")
         for response in msg:
@@ -104,7 +116,8 @@ def construct_phrases_from_imap():
                                 filepath = os.path.join(folder_name, filename)
                                 # download attachment and save it
                                 open(filepath, "wb").write(part.get_payload(decode=True))
-                                fill_phrases_from_text(phrases, part.get_payload(decode=True).decode("utf-8").splitlines())
+                                fill_phrases_from_text(phrases,
+                                                       part.get_payload(decode=True).decode("utf-8").splitlines())
                                 # print(part.get_payload(decode=True).decode("utf-8"))
                 else:
                     # extract content type of email
@@ -112,8 +125,8 @@ def construct_phrases_from_imap():
                     # get the email body
                     body = msg.get_payload(decode=True).decode()
                     # if content_type == "text/plain":
-                        # print only text email parts
-                        # print(body)
+                    # print only text email parts
+                    # print(body)
                 if content_type == "text/html":
                     # if it's HTML, create a new HTML file and open it in browser
                     if not os.path.isdir(folder_name):
@@ -125,18 +138,20 @@ def construct_phrases_from_imap():
                     open(filepath, "w").write(body)
                     # open in the default browser
                     webbrowser.open(filepath)
-                print("="*100)
-				
+                print("=" * 100)
+
     # close the connection and logout
     imap.close()
     imap.logout()
-	
+
     return phrases
+
 
 def main():
     usage = "useage: %prog [options]"
     parser = OptionParser(usage)
-    parser.add_option("-d", "--dir", type="string", dest="input_dir", help="combine and unique-ify all lines from all files in the directory")
+    parser.add_option("-d", "--dir", type="string", dest="input_dir",
+                      help="combine and unique-ify all lines from all files in the directory")
     (options, args) = parser.parse_args()
 
     if (options.input_dir is None):
@@ -146,53 +161,13 @@ def main():
 
     # Write out all items from the set to a text file
     dump_phrases(phrases)
-		
+
+    path = "C://Users/ndenk/PycharmProjects/readEmails/skribblio.txt"
+    words = "the"
+    fo = open(path, 'r').readline()
+    pyperclip.copy(fo)
 
 
-    # Also, automatically create and start skribbl.io room
-			
-    url = "http://skribbl.io"
-    # initialize an HTTP session
-    session = HTMLSession()
-    # GET request
-    res = session.get(url)
-    soup = BeautifulSoup(res.html.html, "html.parser")
-    forms = soup.find_all("form")
-    # forms[0].div.input.text = "not gartic phone"
-    # print(forms[0].div.input.text)
-	
-    # TODO: Fill in name and submit with "Create Private Room"
-    form_login_params = {
-    	'inputName':'Not Gartic Phone',
-    	'buttonLoginCreatePrivate':'',
-    }
-    response = requests.post(url, data=form_login_params)
-    print(response)
-    content = response.content
-    soup = BeautifulSoup(content,"lxml")
-    # print(soup)
-	
-	
-    # TODO: Copy private room URL and either print it or auto send it to all senders to not.gartic.phone@gmail.com
-	
-    # TODO: Populate "Custom Words" textbox with words from 'phrases' and check "Use custom words exclusively" checkbox.
-    form_params = {
-    	'lobbySetCustomWords':'',
-    	'lobbyCustomWordsExclusive':'',
-    }
-	
-	
-	
-    # Wait until everyone joins the room, and then press enter to start the game...
-    val = input("Press enter to start game...")
-	
-    # TODO: Submit with "Start Game"
-	
-    # Wait a couple seconds to allow the game to start, and then leave the room
-    # TODO: It might not even be necessary to sleep here. Test to find out
-    time.sleep(2)
-    session.close()
 
 if __name__ == "__main__":
-	main()
-	
+    main()
