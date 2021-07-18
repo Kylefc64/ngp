@@ -90,7 +90,8 @@ def fetch_and_write_imap_to_dir():
                             pass
                         if content_type == "text/plain" and "attachment" not in content_disposition:
                             # print text/plain emails and skip attachments
-                            print(body)
+                            # print(body)
+                            pass
                         elif "attachment" in content_disposition:
                             # download attachment
                             filename = part.get_filename()
@@ -101,15 +102,15 @@ def fetch_and_write_imap_to_dir():
                                 filepath = os.path.join(folder_name, filename)
                                 # download attachment and save it
                                 open(filepath, "wb").write(part.get_payload(decode=True))
-                                print(part.get_payload(decode=True).decode("utf-8"))
+                                # print(part.get_payload(decode=True).decode("utf-8"))
                 else:
                     # extract content type of email
                     content_type = msg.get_content_type()
                     # get the email body
                     body = msg.get_payload(decode=True).decode()
-                    if content_type == "text/plain":
+                    # if content_type == "text/plain":
                         # print only text email parts
-                        print(body)
+                        # print(body)
                 if content_type == "text/html":
                     # if it's HTML, create a new HTML file and open it in browser
                     if not os.path.isdir(folder_name):
@@ -172,7 +173,7 @@ def main():
     print(response)
     content = response.content
     soup = BeautifulSoup(content,"lxml")
-    print(soup)
+    # print(soup)
 	
 	
     # TODO: Copy private room URL and either print it or auto send it to all senders to not.gartic.phone@gmail.com
