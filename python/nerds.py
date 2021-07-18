@@ -8,6 +8,7 @@ from requests_html import HTMLSession
 from urllib.parse import urljoin
 import requests
 
+""" Writes the final comma-separated output to skribblio.txt. """
 def dump_phrases(phrases):
     f = open("skribblio.txt", "w")
     for phrase in phrases:
@@ -21,7 +22,7 @@ def clean(text):
 """ Adds all lines (after stripping whitespace and converting to lowercase)
     from the text to the phrases set. """
 def fill_phrases_from_text(phrases, text):
-    for line in text.splitlines():
+    for line in text:
         phrases.add(line.strip().lower())
 
 """ Constructs and returns a set of all phrases from all files in the given directory. """
@@ -30,12 +31,13 @@ def construct_phrases_from_input_dir(input_dir):
 
     # Add all lines from each file in the directory to the set
     for filename in glob.glob(os.path.join(input_dir, '*.txt')):
-        for line in open(filename, 'r'):
-            # Remove whitespace and convert to lowercase before adding to the set
-	        phrases.add(line.strip().lower())
+        fill_phrases_from_text(phrases, open(filename, 'r'))
     return phrases
 	
-def fetch_and_write_imap_to_dir():
+""" Constructs and returns set of all words found in all .txt attachments send to not.gartic.phone@gmail.com. """
+def construct_phrases_from_imap():
+    phrases = set()
+
     # account credentials
     username = 'not.gartic.phone@gmail.com'
     password = 'NotGarticPhone399'
@@ -102,6 +104,7 @@ def fetch_and_write_imap_to_dir():
                                 filepath = os.path.join(folder_name, filename)
                                 # download attachment and save it
                                 open(filepath, "wb").write(part.get_payload(decode=True))
+                                fill_phrases_from_text(phrases, part.get_payload(decode=True).decode("utf-8").splitlines())
                                 # print(part.get_payload(decode=True).decode("utf-8"))
                 else:
                     # extract content type of email
@@ -128,24 +131,18 @@ def fetch_and_write_imap_to_dir():
     imap.close()
     imap.logout()
 	
-    return folder_name
+    return phrases
 
 def main():
     usage = "useage: %prog [options]"
     parser = OptionParser(usage)
     parser.add_option("-d", "--dir", type="string", dest="input_dir", help="combine and unique-ify all lines from all files in the directory")
     (options, args) = parser.parse_args()
-	
-
-
-
-
 
     if (options.input_dir is None):
-        input_dir = fetch_and_write_imap_to_dir()
+        phrases = construct_phrases_from_imap()
     else:
-	    input_dir = options.input_dir
-    phrases = construct_phrases_from_input_dir(input_dir)
+	    phrases = construct_phrases_from_input_dir(options.input_dir)
 
     # Write out all items from the set to a text file
     dump_phrases(phrases)
@@ -191,9 +188,9 @@ def main():
 	
     # TODO: Submit with "Start Game"
 	
-    # Wait a few seconds to allow the game to start, and then leave the room
+    # Wait a couple seconds to allow the game to start, and then leave the room
     # TODO: It might not even be necessary to sleep here. Test to find out
-    time.sleep(3)
+    time.sleep(2)
     session.close()
 
 if __name__ == "__main__":
