@@ -142,7 +142,7 @@ def main():
     if (options.input_dir is None):
         phrases = construct_phrases_from_imap()
     else:
-	    phrases = construct_phrases_from_input_dir(options.input_dir)
+        phrases = construct_phrases_from_input_dir(options.input_dir)
 
     # Write out all items from the set to a text file
     dump_phrases(phrases)
