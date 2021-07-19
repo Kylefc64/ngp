@@ -1,4 +1,4 @@
-# not-gartic-phone (ngc)
+# not-gartic-phone (ngp)
 
 Running ngp.py with no options will do the following:
 1. Fetch all lines from all attachments sent to not.gartic.phone@gmail.combine
