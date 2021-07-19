@@ -11,6 +11,7 @@ If invoked with the --skribb / -s option, then a private skribbl.io room will au
 
 # Usage
 
+```
 $ python python/nerds.py --help
 Usage: useage: nerds.py [options]
 
@@ -20,3 +21,4 @@ Options:
                         combine and unique-ify all lines from all files in the
                         directory
   -s, --skribb          automatically start the private skribbl room
+```
