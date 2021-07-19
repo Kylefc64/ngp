@@ -10,14 +10,16 @@ from requests_html import HTMLSession
 from urllib.parse import urljoin
 import requests
 
-""" Writes the final comma-separated output to skribblio.txt. """
+""" Writes the final comma-separated output to skribblio.txt,
+    and returns a comma-separated string of all phrases. """
 
 
 def dump_phrases(phrases):
+    phrases_str = ''.join([phrase + ',' for phrase in phrases])
     f = open("skribblio.txt", "w")
-    for phrase in phrases:
-        f.write("%s," % phrase)
+    f.write(phrases_str)
     f.close()
+    return phrases_str
 
 
 def clean(text):
@@ -46,7 +48,8 @@ def construct_phrases_from_input_dir(input_dir):
     return phrases
 
 
-""" Constructs and returns set of all words found in all .txt attachments send to not.gartic.phone@gmail.com. """
+""" Constructs and returns set of all words found in all .txt attachments
+    send to not.gartic.phone@gmail.com. """
 
 
 def construct_phrases_from_imap():
@@ -145,27 +148,78 @@ def construct_phrases_from_imap():
     imap.logout()
 
     return phrases
+	
+
+""" Automatically creates and starts a skribbl.io room using the word bank
+    given by comma_separated_phrases_str. """
+
+# TODO: Finish implementing this
+def start_skribbl(comma_separated_phrases_str):
+    url = "http://skribbl.io"
+    # initialize an HTTP session
+    session = HTMLSession()
+    # GET request
+    res = session.get(url)
+    soup = BeautifulSoup(res.html.html, "html.parser")
+    forms = soup.find_all("form")
+    # forms[0].div.input.text = "not gartic phone"
+    # print(forms[0].div.input.text)
+
+    # TODO: Fill in name and submit with "Create Private Room"
+    form_login_params = {
+    	'inputName':'Not Gartic Phone',
+    	'buttonLoginCreatePrivate':'',
+    }
+    response = requests.post(url, data=form_login_params)
+    print(response)
+    content = response.content
+    soup = BeautifulSoup(content,"lxml")
+    # print(soup)
+
+
+    # TODO: Copy private room URL and either print it or auto send it to all senders to not.gartic.phone@gmail.com
+
+    # TODO: Populate "Custom Words" textbox with words from 'phrases' and check "Use custom words exclusively" checkbox.
+    form_params = {
+    	'lobbySetCustomWords':'',
+    	'lobbyCustomWordsExclusive':'',
+    }
+
+
+
+    # Wait until everyone joins the room, and then press enter to start the game...
+    val = input("Press enter to start game...")
+
+    # TODO: Submit with "Start Game"
+
+    # Wait a couple seconds to allow the game to start, and then leave the room
+    # TODO: It might not even be necessary to sleep here. Test to find out
+    time.sleep(2)
+    session.close()
 
 
 def main():
     usage = "useage: %prog [options]"
     parser = OptionParser(usage)
-    parser.add_option("-d", "--dir", type="string", dest="input_dir",
+    parser.add_option("-d", "--dir", type="string", dest="input_dir", default=None,
                       help="combine and unique-ify all lines from all files in the directory")
+    parser.add_option("-s", "--skribb", action="store_true", dest="start_skribbl",
+                      metavar="BOOL", default=False, help="automatically start the private skribbl room")
     (options, args) = parser.parse_args()
 
-    if (options.input_dir is None):
-        phrases = construct_phrases_from_imap()
-    else:
+    if (options.input_dir):
         phrases = construct_phrases_from_input_dir(options.input_dir)
+    else:
+        phrases = construct_phrases_from_imap()
 
     # Write out all items from the set to a text file
-    dump_phrases(phrases)
-
-    path = "C://Users/ndenk/PycharmProjects/readEmails/skribblio.txt"
-    words = "the"
-    fo = open(path, 'r').readline()
-    pyperclip.copy(fo)
+    comma_separated_phrases_str = dump_phrases(phrases)
+	
+    # Copy comma-separated string of phrases to the clipboard.
+    pyperclip.copy(comma_separated_phrases_str)
+	
+    if (options.start_skribbl):
+        start_skribbl(comma_separated_phrases_str)
 
 
 
