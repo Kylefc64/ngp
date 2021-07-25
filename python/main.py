@@ -7,7 +7,7 @@ mainGameUrl = 'https://skribbl.io/'
 
 web.get(mainGameUrl)
 
-#allow the website enough time to load before writing in its fields
+#allow the website enough time to load before reading or writing in its fields
 time.sleep(1)
 
 #choose what you want to write
